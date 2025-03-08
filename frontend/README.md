@@ -1,8 +1,4 @@
->install
-
-- npm install axios
-- npm install react-router-dom
-- 추가적으로..
+npm install로 node_modules 설치
 
 npm start로 실행
 
