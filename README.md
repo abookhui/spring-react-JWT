@@ -2,7 +2,7 @@
 
 > 로컬 MySQL 서버 설정
 
-application.yml 파일에서 DB 설정을 할 때 필요한 url, id, pw 필드는 application-db.yml 파일을 참조
+application.yml 파일에서 DB 설정을 할 때 필요한 필드는 application-db.yml 파일을 참조
 (backend/src/main/resources/application-db.yml)
 
 ```yml
