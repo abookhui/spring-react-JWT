@@ -1,22 +1,51 @@
-import { useAuth } from "../AuthContext";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import api from "../api";
 
-const MyPage = () => {
-    const { logout } = useAuth();
-    const navigate = useNavigate();
+const Mypage = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const handleLogout = async () => {
-        await logout();
-        navigate("/login"); // 로그아웃 후 로그인 페이지로 이동
+  useEffect(() => {
+    const fetchMypage = async () => {
+      try {
+        const response = await api.get("/mypage");
+        setUser(response.data.username);
+      } catch (error) {
+        console.error("인증 실패:", error);
+      } finally {
+        setLoading(false); // 로딩 종료
+      }
     };
 
-    return (
-        <div>
-            <h2>My Page</h2>
-            <p>환영합니다! 여기는 마이페이지입니다.</p>
-            <button onClick={handleLogout}>로그아웃</button>
-        </div>
-    );
+    fetchMypage();
+  }, []);
+
+  const handleReissue = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await api.post("/reissue", {}, { withCredentials: true });
+        const accessToken = response.headers["authorization"];
+        if (accessToken) {
+            localStorage.setItem("Authorization", accessToken); 
+        }
+
+    } catch (error) {
+        alert("재발급 실패");
+    }
+  };
+
+  return (
+    <div>
+      <h2>마이페이지</h2>
+      {loading ? <p>로딩 중...</p> : user ? <p>안녕하세요, {user}님</p> : <p>유저 정보를 불러올 수 없습니다.</p>}
+
+      <form onSubmit={handleReissue}>
+     
+     <button type="submit">재발급</button>
+   </form>
+   
+    </div>
+  );
 };
 
-export default MyPage;
+export default Mypage;

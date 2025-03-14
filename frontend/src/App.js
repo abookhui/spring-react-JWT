@@ -1,25 +1,17 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./AuthContext";
-import LoginPage from "./pages/LoginPage";
-import MyPage from "./pages/MyPage";
-
-const PrivateRoute = ({ element }) => {
-    const { token } = useAuth();
-    return token ? element : <Navigate to="/login" />;
-};
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Mypage from "./pages/Mypage";
 
 const App = () => {
-    return (
-        <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
-                    <Route path="*" element={<Navigate to="/login" />} />
-                </Routes>
-            </Router>
-        </AuthProvider>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/mypage" element={<Mypage />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;
