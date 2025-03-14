@@ -38,7 +38,7 @@ api.interceptors.response.use(
           originalRequest.headers["Authorization"] = newAccessToken;
 
           console.log("3");
-          //return api(originalRequest); // 요청 재시도
+          return api(originalRequest); // 요청 재시도
         }
       } catch (err) {
         console.error("토큰 재발급 실패:", err);
