@@ -12,3 +12,7 @@ spring:
         show_sql: true
         highlight_sql: true
 
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
+    access-expired: 86400000
+    refresh-expired: 604800000
