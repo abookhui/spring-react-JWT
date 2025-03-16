@@ -6,28 +6,21 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post("/login", { username, password });
-      
-      // Get token from response headers
       const accessToken = response.headers["authorization"];
-      
       if (accessToken) {
-        // Store token as-is, our interceptor will handle formatting
-        localStorage.setItem("Authorization", accessToken);
-        console.log("로그인 성공, 토큰 저장됨:", accessToken);
-        navigate("/mypage");
-      } else {
-        alert("토큰이 없습니다. 서버 응답을 확인하세요.");
+        localStorage.setItem("Authorization", accessToken); // Bearer 포함됨
       }
+      navigate("/mypage");
     } catch (error) {
-      console.error("로그인 실패:", error);
       alert("로그인 실패");
     }
   };
+  
   
   return (
     <div>
