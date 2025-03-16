@@ -26,7 +26,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        if (!request.getRequestURI().matches("^\\/logout$") || !request.getMethod().equals("POST")) {
+        if (!request.getRequestURI().matches("^\\/api/logout$") || !request.getMethod().equals("POST")) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -57,8 +57,9 @@ public class SecurityConfig {
 
                 //인증 설정
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/join","/login","/logout" ).permitAll()
-                        .requestMatchers("/reissue","/api/reissue").permitAll()
+                        //.requestMatchers("/join","/login","/logout" ).permitAll()
+                        .requestMatchers("/api/join","/api/login","/api/logout" ).permitAll()
+                        .requestMatchers("/api/reissue").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
 

@@ -17,7 +17,7 @@ public class MypageController {
 
     private final JWTUtil jwtUtil;
 
-    @GetMapping("/mypage")
+    @GetMapping("/api/mypage")
     public Map<String, String> mypage(@RequestHeader("Authorization") String token) {
         //System.out.println("받은 토큰 = " + token);
 

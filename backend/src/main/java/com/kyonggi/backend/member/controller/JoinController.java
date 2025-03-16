@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/member")
 @RequiredArgsConstructor
 public class JoinController {
 
     private final JoinService joinService;
 
-    @PostMapping("/join")
+    @PostMapping("/api/join")
     public String joinProcess(@RequestBody JoinDTO joinDTO) {
 
         joinService.joinProcess(joinDTO);
