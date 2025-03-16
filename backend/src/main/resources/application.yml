@@ -1,6 +1,6 @@
 spring:
   config:
-    import: application-db.yml
+    import: application-db.yml, application-jwt.yml
 
   jpa:
     hibernate:
@@ -11,8 +11,3 @@ spring:
           time_zone: Asia/Seoul
         show_sql: true
         highlight_sql: true
-
-  jwt:
-    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
-    access-expired: 86400000
-    refresh-expired: 604800000
