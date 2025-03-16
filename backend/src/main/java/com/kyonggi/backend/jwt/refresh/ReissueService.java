@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class ReissueService {
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
 
+    @Transactional
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = extractRefreshToken(request);
 
@@ -33,7 +35,7 @@ public class ReissueService {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-            refreshRepository.deleteByRefresh(refresh);
+            refreshRepository.deleteByRefresh(refresh); // 만료된 refreshToken 삭제
             log.error("refresh token expired");
             return new ResponseEntity<>("refresh token expired", HttpStatus.FORBIDDEN);
         }
@@ -44,7 +46,7 @@ public class ReissueService {
             return new ResponseEntity<>("refresh token not found", HttpStatus.FORBIDDEN);
         }
 
-        System.out.println("refresh : refreshEntity = " + refreshEntity);
+        // 토큰 검증
         String category = jwtUtil.getCategory(refresh);
         if (!"refresh".equals(category)) {
             log.error("invalid refresh token");
@@ -55,10 +57,13 @@ public class ReissueService {
         String role = jwtUtil.getRole(refresh);
 
         String newAccess = jwtUtil.createJwt("access", username, role, 60 * 60L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, 60 * 60 * 24L);
 
-        refreshRepository.deleteByRefresh(refresh);
-        addRefreshEntity(username, newRefresh, 86400000L);
+        // 기존 Refresh Token 삭제 (존재 여부 확인 후 삭제)
+        refreshEntity.ifPresent(entity -> refreshRepository.deleteByRefresh(entity.getRefresh()));
+
+        // 새 Refresh Token 저장
+        addRefreshEntity(username, newRefresh, 60 * 60 * 24L);
 
         response.setHeader("Authorization", "Bearer " + newAccess);
         response.addCookie(createCookie("refresh", newRefresh, 60 * 60 * 24));
@@ -80,10 +85,10 @@ public class ReissueService {
     private Cookie createCookie(String key, String value, int maxAge) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(maxAge);
-        cookie.setSecure(true); // HTTPS에서만 전송 (개발 환경에서는 false로 변경)
+        cookie.setSecure(false); // HTTPS에서만 전송 (개발 환경에서는 false로 변경)
         cookie.setPath("/");
         cookie.setHttpOnly(true); // JavaScript에서 접근 불가
-        cookie.setAttribute("SameSite", "None"); // CORS 환경에서 필수
+        cookie.setAttribute("SameSite", "Strict"); // CORS 환경에서 필수
         return cookie;
     }
 

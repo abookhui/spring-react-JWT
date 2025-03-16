@@ -9,6 +9,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +27,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private Long accessTokenExpiration;
 
     public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
         this.authenticationManager = authenticationManager;
@@ -67,7 +69,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                            FilterChain chain, Authentication authentication
+    ) throws IOException {
 
         System.out.println("successfulAuthentication");
         String username = authentication.getName();
@@ -75,7 +79,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // token 생성
         String access = jwtUtil.createJwt("access", username, role,  60 * 60L); // 1시간
-        String refresh = jwtUtil.createJwt("refresh", username, role, 24 * 60 * 60L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, 24 * 60 * 60L); // 24
 
 
         //Refresh 토큰 저장
@@ -93,10 +97,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(maxAge);
-        cookie.setSecure(true); // HTTPS에서만 전송 (개발 환경에서는 false로 변경)
+        cookie.setSecure(false); // HTTPS에서만 전송 (개발 환경에서는 false로 변경)
         cookie.setPath("/");
-        cookie.setHttpOnly(true); // JavaScript에서 접근 불가
-        cookie.setAttribute("SameSite", "None"); // CORS 환경에서 필수
+        cookie.setHttpOnly(false); // JavaScript에서 접근 불가
+        //cookie.setAttribute("SameSite", "None"); // CORS 환경에서 필수
+        cookie.setAttribute("SameSite", "Strict"); // CORS 환경에서 필수
         return cookie;
     }
 
