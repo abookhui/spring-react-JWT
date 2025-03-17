@@ -1,6 +1,6 @@
 spring:
   config:
-    import: application-db.yml, application-jwt.yml
+    import: application-db.yml, application-secret.yml
 
   jpa:
     hibernate:
