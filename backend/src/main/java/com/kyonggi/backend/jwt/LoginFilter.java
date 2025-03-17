@@ -9,7 +9,6 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -87,7 +86,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
         // 응답 생성
-        response.setHeader("Authorization", "Bearer " + access); // header 에서 cookie로 변경
+        response.setHeader("Authorization", "Bearer " + access);
         response.addCookie(createCookie("refresh", refresh, 24 * 60 * 60));
 
         response.setStatus(HttpStatus.OK.value());
