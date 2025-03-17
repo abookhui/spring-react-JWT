@@ -2,6 +2,9 @@ import axios from "axios";
 
 const backendUrl = "http://localhost:8080/api";
 
+
+
+
 // 일반 요청에 사용할 axios 인스턴스
 const api = axios.create({
   baseURL: backendUrl,
@@ -120,5 +123,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default api;

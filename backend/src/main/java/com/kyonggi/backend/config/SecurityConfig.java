@@ -6,6 +6,8 @@ import com.kyonggi.backend.jwt.JWTFilter;
 import com.kyonggi.backend.jwt.JWTUtil;
 import com.kyonggi.backend.jwt.LoginFilter;
 import com.kyonggi.backend.member.repository.RefreshRepository;
+import com.kyonggi.backend.oauth2.CustomOAuth2UserService;
+import com.kyonggi.backend.oauth2.CustomSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -33,6 +36,9 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -58,14 +64,16 @@ public class SecurityConfig {
                 //인증 설정
                 .authorizeHttpRequests((auth) -> auth
                         //.requestMatchers("/join","/login","/logout" ).permitAll()
-                        .requestMatchers("/api/join","/api/login","/api/logout" ).permitAll()
+                        .requestMatchers("/api/join","/api/login","/api/logout" ,"/oauth2/**"
+                        ,"/api/auth/**").permitAll()
                         .requestMatchers("/api/reissue").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
 
 
                 //filter 설정
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) // 변경된 부분
+                //.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository),
                         UsernamePasswordAuthenticationFilter.class)
@@ -74,6 +82,16 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler)
+                        .authorizationEndpoint(authorizationEndpointConfig ->
+                                authorizationEndpointConfig.baseUri("/oauth2/authorization"))
+                        .redirectionEndpoint(redirectionEndpointConfig ->
+                                redirectionEndpointConfig.baseUri("/login/oauth2/code/*"))
+                )
 
                 //cors 설정
                 .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
